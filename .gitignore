@@ -1,0 +1,10 @@
+venv/
+.vscode/
+pairs.parquet
+unsloth_compiled_cache/
+__pycache__/
+*.pyc
+outputs/
+mangpt 3B/
+*.gguf
+updated_pairs.parquet
