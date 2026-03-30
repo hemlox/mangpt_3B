@@ -3,6 +3,7 @@ from trl import SFTConfig, SFTTrainer
 from transformers import DataCollatorForSeq2Seq
 from datasets import load_dataset
 import torch
+import os
 # 90% of the code here is copy-pasted boiler-plate code 
 # from https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Llama3.2_(1B_and_3B)-Conversational.ipynb#scrollTo=Dv1NBUozV78l
 #i only know how the important things work unsloth abstracts away everything else
@@ -43,9 +44,9 @@ trainer = SFTTrainer(
     #data_collator = DataCollatorForSeq2Seq(tokenizer = tokenizer), will fuck with packing
     packing = True, # Gain in speed lwk outweighs the losses
     args = SFTConfig(
-        per_device_train_batch_size = 2,
-        gradient_accumulation_steps = 12,
-        warmup_steps = 5,
+        per_device_train_batch_size = 1,
+        gradient_accumulation_steps = 24,
+        warmup_steps = 50,
         num_train_epochs = 3, 
         max_steps = -1,
         learning_rate = 2e-4,
@@ -58,10 +59,25 @@ trainer = SFTTrainer(
         seed = 3407,
         output_dir = "outputs",
         report_to = "none", 
+        ## to implement training in batches
+        save_strategy= "steps",
+        save_steps=50,
+        save_total_limit=2
     ),
 )
-print("Starting training...")
-trainer_stats = trainer.train()
+save_folder = "outputs"
+should_resume = False
+if os.path.exists(save_folder):
+    files_in_folder = os.listdir(save_folder)
+    save_files = []
+    for file in files_in_folder:
+        if "checkpoint-" in file:
+            save_files.append(file)
+    if len(save_files) >0:
+        should_resume = True
+
+print(f"Starting training...Flag: resuming or not {should_resume}")
+trainer_stats = trainer.train(resume_from_checkpoint=should_resume)
 print(f"Training complete in {trainer_stats.metrics['train_runtime']} seconds.")
 # Saving the  LoRA weights locally
 model.save_pretrained("mangpt 3B")
