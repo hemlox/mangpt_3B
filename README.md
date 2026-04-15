@@ -11,7 +11,7 @@ My main contribution was engineering the data pipeline and adapting existing too
     - Processes 234,000 conversational examples.
     - Formats each example into the standard Alpaca instruction-tuning template, adding a "sliding window" of the previous 5 messages as input context.
 
-2. **Memory-Efficient Training:** To fit the 3B model onto the 8GB GPU, I utilized the **Unsloth** library. The core training loop in `mangpt_3b.py` is an adaptation of the official Unsloth Colab notebooks, which allowed me to focus on the data engineering. The key technique was **4-bit quantization (QLoRA)** to fit the model within the VRAM constraint.
+2. **Memory-Efficient Training:** To fit the 3B model onto the 8GB GPU, I utilized the **Unsloth** library. The core training loop in `mangpt_3B.py` is an adaptation of the official Unsloth Colab notebooks, which allowed me to focus on the data engineering. The key technique was **4-bit quantization (QLoRA)** to fit the model within the VRAM constraint.
 
 3. **Resumable Training:** The script was configured to automatically detect and resume from saved checkpoints, making the multi-hour training process more robust.
 
@@ -22,19 +22,34 @@ My main contribution was engineering the data pipeline and adapting existing too
 
 ## How to Run
 
-1. Clone the repository and install dependencies:
+**Prerequisites:** This project requires an NVIDIA GPU. The included dependency files are optimized for **Linux and CUDA 12.4**.
+
+1. Clone the repository:
 ```bash
-    git clone https://github.com/hemlox/mangpt_3b.git
-    cd mangpt_3b
-    pip install -r requirements.txt
+git clone https://github.com/hemlox/mangpt_3B.git
+cd mangpt_3B
 ```
-2. Place your data and run the formatting script:
+
+2. Create and activate a virtual environment (Highly Recommended):
 ```bash
-    python src/alpaca_formatting.py
+python3 -m venv .venv
+source .venv/bin/activate
 ```
-3. Begin the training process:
+
+3. Install dependencies:
 ```bash
-    python src/mangpt_3b.py
+pip install -r requirements.txt
+```
+*(Note for developers: This project uses `pip-tools`. If you need to add new packages, add them to `requirements.in`, then run `pip-compile requirements.in` and `pip-sync` to update the environment).*
+
+4. Format the dataset:
+```bash
+python src/alpaca_formatting.py
+```
+
+5. Begin the training process:
+```bash
+python src/mangpt_3B.py
 ```
 
 ## What I'd Do Differently
@@ -43,4 +58,4 @@ Unsloth abstracted away a lot of the training internals, convenient for getting 
 
 ## Acknowledgements
 
-The base model used in this project is built on Meta's [Llama 3.2](https://ai.meta.com/research/publications/the-llama-3-herd-of-models/) architecture.
+The base model used in this project is built on Meta's[Llama 3.2](https://ai.meta.com/research/publications/the-llama-3-herd-of-models/) architecture.
